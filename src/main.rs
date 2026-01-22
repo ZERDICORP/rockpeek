@@ -11,7 +11,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Cli::parse();
 
     // Открываем базу (только путь)
-    let rockpeek = RockPeekDB::open_read_only(&args.db_path)?;
+    let rockpeek = RockPeekDB::open(&args.db_path)?;
 
     // Сканируем указанную column family
     rockpeek.scan(&args.column_family)?;
