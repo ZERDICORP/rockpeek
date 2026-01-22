@@ -1,4 +1,4 @@
-use rocksdb::{DB, Options, ColumnFamilyDescriptor, IteratorMode};
+use rocksdb::{DB, Options, IteratorMode};
 use crate::utils::to_hex;
 use std::error::Error;
 
@@ -8,25 +8,13 @@ pub struct RockPeekDB {
 }
 
 impl RockPeekDB {
-    /// Открываем базу и все column family
-    pub fn open(path: &str) -> Result<Self, Box<dyn Error>> {
-        // Получаем список column family (если база пустая, дефолтная "default")
-        let cfs = DB::list_cf(&Options::default(), path)
-            .unwrap_or_else(|_| vec!["default".to_string()]);
-
-        // Создаем дескрипторы column family
-        let cf_descriptors: Vec<ColumnFamilyDescriptor> = cfs
-            .into_iter()
-            .map(|name| ColumnFamilyDescriptor::new(name, Options::default()))
-            .collect();
-
-        // Открываем базу с column family
-        let db = DB::open_cf_descriptors(&Options::default(), path, cf_descriptors)?;
-
+    /// Открываем базу в режиме read-only
+    pub fn open_read_only(path: &str) -> Result<Self, Box<dyn Error>> {
+        let db = DB::open_for_read_only(&Options::default(), path, false)?;
         Ok(Self { db })
     }
 
-    /// Сканируем указанную column family и выводим ключи/значения в hex
+    /// Сканируем указанную column family
     pub fn scan(&self, cf_name: &str) -> Result<(), Box<dyn Error>> {
         let cf_handle = self.db.cf_handle(cf_name)
             .ok_or(format!("Column family '{}' not found", cf_name))?;
