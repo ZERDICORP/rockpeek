@@ -1,0 +1,9 @@
+[package]
+name = "rockpeek"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rocksdb = "0.24"      # или последняя доступная версия
+hex = "0.4"
+clap = { version = "4.4", features = ["derive"] }
