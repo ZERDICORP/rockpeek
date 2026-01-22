@@ -1,7 +1,7 @@
+use base64::Engine;
+use base64::engine::general_purpose::STANDARD;
 use prost_reflect::{DescriptorPool, DynamicMessage};
 use std::error::Error;
-use base64::engine::general_purpose::STANDARD;
-use base64::Engine;
 
 /// Байты → HEX
 pub fn to_hex(bytes: &[u8]) -> String {
