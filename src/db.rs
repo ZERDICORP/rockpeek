@@ -1,47 +1,47 @@
-use rocksdb::{DB, Options, ColumnFamilyDescriptor, IteratorMode};
-use crate::utils::to_hex;
+use rocksdb::{IteratorMode, Options, DB};
+use std::collections::HashSet;
 use std::error::Error;
+use std::path::Path;
 
-/// Структура для работы с RocksDB
 pub struct RockPeekDB {
     db: DB,
 }
 
 impl RockPeekDB {
-    /// Read-only открытие базы с поддержкой всех CF
-    pub fn open(path: &str) -> Result<Self, Box<dyn Error>> {
-        // Получаем список всех CF в базе
-        let cfs = DB::list_cf(&Options::default(), path)
-            .unwrap_or_else(|_| vec!["default".to_string()]);
+    /// Открываем RocksDB в read-only режиме
+    pub fn open_read_only<P: AsRef<Path>>(path: P) -> Result<Self, Box<dyn Error>> {
+        let mut opts = Options::default();
+        opts.create_if_missing(false);
 
-        // Создаём дескрипторы CF
-        let cf_descriptors: Vec<ColumnFamilyDescriptor> = cfs
-            .iter()
-            .map(|name| ColumnFamilyDescriptor::new(name, Options::default()))
-            .collect();
-
-        // Открываем базу read-only с этими CF
-        let db = DB::open_cf_descriptors_read_only(&Options::default(), path, cf_descriptors, false)?;
+        let db = DB::open_for_read_only(&opts, path, false)?;
         Ok(Self { db })
     }
 
-    /// Сканируем указанную column family
-    pub fn scan(&self, cf_name: &str) -> Result<(), Box<dyn Error>> {
-        let cf_handle = self.db.cf_handle(cf_name)
-            .ok_or(format!("Column family '{}' not found", cf_name))?;
+    /// Сканируем column family и вызываем callback на каждую запись
+    pub fn scan_cf<F>(&self, cf_name: &str, mut on_record: F) -> Result<(), Box<dyn Error>>
+    where
+        F: FnMut(&[u8], &[u8]),
+    {
+        let cf = self
+            .db
+            .cf_handle(cf_name)
+            .ok_or_else(|| format!("Column family '{}' not found", cf_name))?;
 
-        let iter = self.db.iterator_cf(cf_handle, IteratorMode::Start);
+        let iter = self.db.iterator_cf(cf, IteratorMode::Start);
+
+        let mut seen_keys: HashSet<Vec<u8>> = HashSet::new();
 
         for item in iter {
-            match item {
-                Ok((key, value)) => {
-                    println!("0x{} ==> 0x{}", to_hex(&key), to_hex(&value));
-                }
-                Err(e) => eprintln!("Ошибка чтения ключа: {}", e),
+            let (key, value) = item?;
+
+            // deduplication по ключу
+            if !seen_keys.insert(key.to_vec()) {
+                continue;
             }
+
+            on_record(&key, &value);
         }
 
         Ok(())
     }
 }
-

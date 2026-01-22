@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-rocksdb = "0.24"      # или последняя доступная версия
-hex = "0.4"
-clap = { version = "4.4", features = ["derive"] }
+rocksdb = "0.24"
+clap = { version = "4.3", features = ["derive"] }
+prost = "0.11"
+prost-reflect = "0.12"
+base64 = "0.21"
+hex = "0.4.3"
+
