@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Загружаем proto, если он передан
     let proto_pool = match &args.proto {
-        Some(p) => Some(utils::load_proto_descriptor(p)?),
+        Some(p) => Some(utils::load_proto_from_base64(p)?),
         None => None,
     };
 
