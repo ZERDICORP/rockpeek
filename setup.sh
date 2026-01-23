@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-if [[ "$EUID" -ne 0 ]]; then
-
 apt update -qq >/dev/null 2>&1
 apt install -y -qq protobuf-compiler >/dev/null 2>&1
 
+if [[ "$EUID" -ne 0 ]]; then
 cat <<'EOF'
                                                                                           
                                      ▄▄                                                   
