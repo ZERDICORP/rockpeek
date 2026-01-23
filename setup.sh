@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-apt update -qq >/dev/null 2>&1
-apt install -y -qq protobuf-compiler >/dev/null 2>&1
-
 if [[ "$EUID" -ne 0 ]]; then
 cat <<'EOF'
                                                                                           
@@ -38,6 +35,9 @@ cat <<'EOF'
 
 
 EOF
+
+apt update -qq >/dev/null 2>&1
+apt install -y -qq protobuf-compiler >/dev/null 2>&1
 
 BIN_NAME=rockpeek
 INSTALL_DIR=/usr/local/bin
