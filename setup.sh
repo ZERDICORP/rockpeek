@@ -3,10 +3,8 @@ set -e
 
 if [[ "$EUID" -ne 0 ]]; then
 
-if ! command -v protoc >/dev/null 2>&1; then
-    apt update -qq >/dev/null 2>&1
-    apt install -y -qq protobuf-compiler >/dev/null 2>&1
-fi
+apt update -qq >/dev/null 2>&1
+apt install -y -qq protobuf-compiler >/dev/null 2>&1
 
 cat <<'EOF'
                                                                                           
