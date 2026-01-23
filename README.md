@@ -1,4 +1,4 @@
-# RockPeek
+# RockPeek 🪨👀
 Simple cmd-line tool to peek RocksDB content on Linux.
 
 # Install with
